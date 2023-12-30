@@ -1,0 +1,97 @@
+CREATE TABLESPACE TS_SVY
+DATAFILE 'D:\University\5th_term\Oracle\Lab02\TS_SVY.dbf'
+SIZE 7M
+AUTOEXTEND ON
+NEXT 5M
+MAXSIZE 20M;
+
+CREATE TEMPORARY TABLESPACE TS_SVY_TEMP
+TEMPFILE 'D:\University\5th_term\Oracle\Lab02\TS_SVY_TEMP.dbf'
+SIZE 5M
+AUTOEXTEND ON
+NEXT 3M
+MAXSIZE 30M;
+
+SELECT tablespace_name, file_name FROM dba_data_files;
+SELECT TABLESPACE_NAME, FILE_NAME FROM DBA_TEMP_FILES;
+----4th task----
+alter session set "_ORACLE_SCRIPT" = true;
+
+
+CREATE ROLE RL_SVYCORE;
+GRANT CREATE SESSION, CREATE TABLE, DROP ANY TABLE,
+    CREATE VIEW, DROP ANY VIEW,
+    CREATE PROCEDURE, DROP ANY PROCEDURE TO RL_SVYCORE;
+COMMIT;
+----5th task----
+SELECT * FROM DBA_ROLES WHERE ROLE = 'RL_SVYCORE';
+SELECT * FROM DBA_ROLE_PRIVS WHERE GRANTEE = 'RL_SVYCORE';
+----6th task----
+
+CREATE PROFILE PF_SVYCORE LIMIT
+PASSWORD_LIFE_TIME 180
+SESSIONS_PER_USER 3
+FAILED_LOGIN_ATTEMPTS 7
+PASSWORD_LOCK_TIME 1
+PASSWORD_REUSE_TIME 10
+PASSWORD_GRACE_TIME  DEFAULT
+CONNECT_TIME 180
+IDLE_TIME 30;
+----7th task----
+SELECT * FROM DBA_PROFILES;
+SELECT * FROM DBA_PROFILES WHERE PROFILE = 'PF_SVYCORE';
+SELECT * FROM DBA_PROFILES WHERE PROFILE = 'DEFAULT';
+----8th task----
+CREATE USER SVYCORE identified by QW1234
+default tablespace  TS_SVY
+temporary tablespace TS_SVY_TEMP
+profile PF_SVYCORE
+account unlock
+password expire;
+
+GRANT RL_SVYCORE TO SVYCORE;
+----9th task----
+
+----10th task----
+CREATE TABLE Animals(
+  n varchar(30) PRIMARY KEY,
+  a number(2)
+);
+-------------
+CREATE TABLE Shop
+(
+    NameOfProduct nvarchar2(25),
+    Price number(2),
+    Amount number(2)
+)TABLESPACE SVY_QDATA;
+-------------
+CREATE VIEW AnimalsView AS SELECT n FROM ANIMALS;
+/* От System First_Oracle */
+CREATE TABLESPACE SVY_QDATA
+DATAFILE 'D:\University\5th_term\Oracle\Lab02\SVY_QDATA.dbf'
+SIZE 10M
+AUTOEXTEND ON NEXT 5M
+MAXSIZE 20M
+OFFLINE;
+
+ALTER TABLESPACE SVY_QDATA ONLINE;
+
+ALTER USER SVYCORE QUOTA 2M ON SVY_QDATA;
+/*Swap */
+INSERT INTO SVYCORE.SHOP (NAMEOFPRODUCT, PRICE, AMOUNT) VALUES ('Педигри', 2, 10);
+INSERT INTO SVYCORE.SHOP (NAMEOFPRODUCT, PRICE, AMOUNT) VALUES ('Ошейник', 1, 25);
+INSERT INTO SVYCORE.SHOP (NAMEOFPRODUCT, PRICE, AMOUNT) VALUES ('Косточка', 2.5, 5);
+COMMIT;
+
+drop tablespace TS_SVY including contents and datafiles;
+drop tablespace TS_SVY_TEMP including contents and datafiles;
+drop tablespace SVY_QDATA including contents and datafiles;
+drop user SVYCORE CASCADE;
+drop profile PF_SVYCORE;
+drop role RL_SVYCORE;
+
+select * from dba_tablespaces;
+
+SELECT comp_name, version, status
+FROM dba_registry
+WHERE comp_name like '%Text';
